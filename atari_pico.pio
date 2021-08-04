@@ -1,0 +1,106 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program atari_pico_0_4_pindirs
+    set pindirs, 31
+
+.wrap_target
+    wait 0 pin 12
+    set pindirs, 0
+
+    wait 1 pin 12
+    set pindirs, 31
+.wrap
+
+% c-sdk {
+void atari_pico_pindirs_0_4_program_init(PIO pio, uint sm, uint offset) {
+    // Output GPIOs for Data
+    pio_gpio_init(pio, 13);
+    pio_gpio_init(pio, 14);
+    pio_gpio_init(pio, 15);
+    pio_gpio_init(pio, 16);
+    pio_gpio_init(pio, 17);
+
+    // Configure SM
+    pio_sm_config c = atari_pico_0_4_pindirs_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, 0);
+    sm_config_set_set_pins(&c, 13, 5);
+    pio_sm_init(pio, sm, offset, &c);
+
+    // Further setup of SM
+    pio_sm_set_consecutive_pindirs(pio, sm, 0, 13, false);
+}
+%}
+
+.program atari_pico_5_7_pindirs
+    set pindirs, 7
+
+.wrap_target
+    wait 0 pin 12
+    set pindirs, 0
+
+    wait 1 pin 12
+    set pindirs, 7
+.wrap
+
+% c-sdk {
+void atari_pico_pindirs_5_7_program_init(PIO pio, uint sm, uint offset) {
+    // Output GPIOs for Data
+    pio_gpio_init(pio, 18);
+    pio_gpio_init(pio, 19);
+    pio_gpio_init(pio, 20);
+
+    // Configure SM
+    pio_sm_config c = atari_pico_5_7_pindirs_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, 0);
+    sm_config_set_set_pins(&c, 18, 3);
+    pio_sm_init(pio, sm, offset, &c);
+
+    // Further setup of SM
+    pio_sm_set_consecutive_pindirs(pio, sm, 0, 13, false);
+}
+%}
+
+.program atari_pico
+    ;set pins, 0
+
+    ; Read 13 bit address
+    in pins, 13
+    
+    ; Wait for data lookup
+    irq wait 0
+    ;set pins, 1
+
+    ; TXFifo contains data
+    out pins, 8
+
+% c-sdk {
+void atari_pico_program_init(PIO pio, uint sm, uint offset) {
+    // Output GPIOs for Data
+    pio_gpio_init(pio, 13);
+    pio_gpio_init(pio, 14);
+    pio_gpio_init(pio, 15);
+    pio_gpio_init(pio, 16);
+    pio_gpio_init(pio, 17);
+    pio_gpio_init(pio, 18);
+    pio_gpio_init(pio, 19);
+    pio_gpio_init(pio, 20);
+    //pio_gpio_init(pio, PICO_DEFAULT_LED_PIN);
+
+    // Configure SM
+    pio_sm_config c = atari_pico_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, 0);
+    sm_config_set_out_pins(&c, 13, 8);
+    sm_config_set_in_shift(&c, false, true, 13);
+    sm_config_set_out_shift(&c, true, true, 8);
+    //sm_config_set_set_pins(&c, PICO_DEFAULT_LED_PIN, 1);
+    pio_sm_init(pio, sm, offset, &c);
+
+    // Further setup of SM
+    pio_sm_set_consecutive_pindirs(pio, sm, 0, 13, false);
+    //pio_sm_set_consecutive_pindirs(pio, sm, PICO_DEFAULT_LED_PIN, 1, true);
+}
+%}
